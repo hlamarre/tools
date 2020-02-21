@@ -117,7 +117,11 @@ class WTRand():
 #______________________________________________________________________________________________________________________________________________________________________________
 # wavetable from buffer record
 class WTLive(WTRand):
-    
+
+    """
+    does not work
+
+    """
 
     def __init__(self, freq=440, mul=1):
 
@@ -230,7 +234,7 @@ class CloudOsc():
 class Entropie:
     """
         random signal destroyer
-            Entropie(self, res=.01, dens=1, mul=1, add=0 )
+            Entropie(res=.01, length=1, sub=.3, floor=0, mul=.5 )
             e = Entropie()
             met = Metro(.5).play()
             new_a = TrigFunc(met, e.new, arg=None)
@@ -278,8 +282,8 @@ class Entropie:
 
 class EntropieRegen:
     """
-        random signal destroyer
-            Entropie(self, res=.01, dens=1, mul=1, add=0 )
+        random signal destroyer and regenerator (lfo like)
+            Entropie(res=.01, length=1, sub=.3, floor=0, mul=.5 )
             e = Entropie()
             met = Metro(.5).play()
             new_a = TrigFunc(met, e.new, arg=None)
@@ -719,8 +723,10 @@ class TripleChaos:
         output osc3
     ctrl()
         display sliders for each available parameters
+    setThresh(thresh)
+        set threshold for trig (accessible via TripleChaos.trig)
     """
-    def __init__(self, system=1, pitch=.5, chaos1=.5, chaos2=.5, chaos3=.5, amp1=.5, amp2=.5, amp3=.5, stereo=False):
+    def __init__(self, system=1, pitch=.5, chaos1=.5, chaos2=.5, chaos3=.5, amp1=.5, amp2=.5, amp3=.5, stereo=False, thresh=.5):
         
         self.system = system
         self.pitch = pitch 
@@ -731,6 +737,7 @@ class TripleChaos:
         self.amp2 = amp2 
         self.amp3 = amp3 
         self.stereo = stereo
+        self.thresh = thresh
 
         if self.system == 1:
             self.osc1 = Rossler(self.pitch, self.chaos1, mul=self.amp1) 
@@ -746,6 +753,8 @@ class TripleChaos:
             self.osc1 = ChenLee(self.pitch, self.chaos1, mul=self.amp1) 
             self.osc2 = ChenLee(self.osc1, self.chaos2, mul=self.amp2)
             self.osc3 = ChenLee(self.osc1+self.osc2, self.chaos3, self.stereo, self.amp3)
+
+        self.trig = Thresh(self.osc3, self.thresh)
 
     def setPitch(self, pitch):
         self.pitch = pitch
@@ -775,6 +784,9 @@ class TripleChaos:
         self.amp3 = mul
         self.osc3.setMul(self.amp3)
 
+    def setThresh(self, thresh):
+        self.trig.setThreshold(thresh)
+
     def out(self):
         self.osc3.out()
 
@@ -790,11 +802,15 @@ class TripleChaos:
 
 #_________________________________________________________________________________________________________
 
-ent = EntropieRegen()
-osc=Sine([300,480,720], mul=ent.val).out()
+osc = TripleChaos(2, stereo=True)
+#osc.out()
+osc.ctrl()
+met=Metro().play()
+table = LinTable([(0,0),(100,.5),(5000,0)])
+env = TrigEnv(osc.trig, table)
+sine = Sine(220, mul=env).out()
 
-met = Metro(3).play()
-trig = TrigFunc(met, ent.new, arg=None)
+
 
 
 s.gui(locals())

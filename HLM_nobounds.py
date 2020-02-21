@@ -7,7 +7,9 @@ s = Server(winhost="asio").boot()
 s.setMidiInputDevice(99) # Open all input devices.
 
 '''
+
 different classes
+
 '''
 
 
@@ -15,9 +17,12 @@ different classes
 class WTRand():
     """
         randomly generated wavetable
+
         WTRand(freq=440, mul=1)
+
         out(ch=1):
             1 or 2 channels
+
         setNewWaves(type=3)
             set new type:
                 1-Cosine Logaritmic
@@ -26,12 +31,16 @@ class WTRand():
                 4-Exponential
                 5-Linear
                 6-Logaritmic
+
         setPointer(pointer)
             set pointer between 0-1 on table
+
         setMul(mul)
             set volume
+
         setFreq(freq)
             set oscillator frequency
+
     """
     def __init__(self, freq=440, mul=1, pointer=0, type=2):
 
@@ -178,7 +187,9 @@ class WTLive(WTRand):
 class CloudOsc():
     """
         cloud oscillator
+
         CloudOsc(dens=40, dist=10, freq=110, waveform=7, mul=1)
+
         waveform :
             0 Saw up 
             1 Saw down
@@ -188,8 +199,10 @@ class CloudOsc():
             5 Bipolar pulse
             6 Sample and hold
             7 Modulated Sine(default)
+
         out(selfch=1)
             1 or 2 channels
+
         setFreq(freq)
             set new frequency
     """
@@ -230,101 +243,52 @@ class CloudOsc():
 class Entropie:
     """
         random signal destroyer
+
             Entropie(self, res=.01, dens=1, mul=1, add=0 )
+
             e = Entropie()
             met = Metro(.5).play()
             new_a = TrigFunc(met, e.new, arg=None)
             osc = LFO(freq=300, sharp=0.50, type=0, mul=e.val, add=0).mix(2).out()
+
         new()
             new signal
+
     """
-    def __init__(self, res=.01, length=1, sub=.3, floor=0, mul=.5 ):
+    def __init__(self, res=.01, dens=1, mul=1, add=0 ):
         
         self.res = res
-        self.range = int(1/res * length)
+        self.range = int(1/res * dens)
 
         self.mul = mul
-        self.add = sub
-        self.floor = floor
+        self.add = add
         
-        self.list = []        
+        self.a = []        
         self.new()
 
         self.val = SigTo(self.mul, self.res)
-
-        self.i = 0
         self.met_appamp = Metro(self.res).play()
         self.app = TrigFunc(self.met_appamp, self.appamp, arg=None)
-        self.n_step = int((self.mul-self.floor)/self.add)
 
     def new(self):
-        self.list.clear()
-        self.i = 0
+        self.a.clear()
         for i in range(self.range):
-            self.list.append(self.mul)
+            self.a.append(self.mul)
 
     def appamp(self):
-        if self.list[self.i] >0:
-            self.list[self.i] -= self.add
-            if self.list[self.i] < 0:
-                self.list[self.i] = 0
-        self.val.value = random.choice(self.list)
-        self.i += 1
-        if self.i == self.range:
-          self.i = 0
-
+        self.a.append(self.add)
+        del self.a[self.add]
+        self.val.value = random.choice(self.a)
             
-#______________________________________________________________________________________________________________________________________________________________________________
-
-class EntropieRegen:
-    """
-        random signal destroyer
-            Entropie(self, res=.01, dens=1, mul=1, add=0 )
-            e = Entropie()
-            met = Metro(.5).play()
-            new_a = TrigFunc(met, e.new, arg=None)
-            osc = LFO(freq=300, sharp=0.50, type=0, mul=e.val, add=0).mix(2).out()
-        new()
-            new signal
-    """
-    def __init__(self, res=.01, length=1, sub=.3, floor=0, mul=.5 ):
-        
-        self.res = res
-        self.range = int(1/res * length)
-
-        self.mul = mul
-        self.add = sub
-        self.floor = floor
-        
-        self.list = []        
-        self.new()
-
-        self.val = SigTo(self.mul, self.res)
-
-        self.i = 0
-        self.met_appamp = Metro(self.res).play()
-        self.app = TrigFunc(self.met_appamp, self.appamp, arg=None)
-        self.n_step = int((self.mul-self.floor)/self.add)
-
-    def new(self):
-        self.list.clear()
-        self.i = 0
-        for i in range(self.range):
-            self.list.append(self.mul)
-
-    def appamp(self):
-        self.list[self.i] -= self.add
-        self.val.value = random.choice(self.list)
-        self.i += 1
-        if self.i == self.range:
-          self.i = 0
 
 #______________________________________________________________________________________________________________________________________________________________________________
 
 class RandLoopSeq:
     """
         random looping sequence
+
             RandRepSeq(len=16, tempo=180, loop=4, scale="major", root=60)
+
             scales = { "major":      [0, 2, 4, 5, 7, 9, 11],
                         "minorH":     [0, 2, 3, 5, 7, 8, 11],
                         "minorM":     [0, 2, 3, 5, 7, 9, 11],
@@ -343,8 +307,10 @@ class RandLoopSeq:
                         "minorBlues": [0, 3, 5, 8, 10],
                         "minorHungarian": [0, 2, 3, 6, 7, 8, 11]
                       }
+
             new()
                 new sequence
+
     """
     def __init__(self, len=16, tempo=180, loop=4, scale="major", root=120):
         
@@ -434,7 +400,9 @@ class RandLoopSeq:
 class ComplexRandLoopSeq:
     """
         random looping sequence
+
             RandRepSeq(len1=2, len2=3, len3=4, tempo=180, loop=4, scale="major", root=60)
+
             scales = { "major":      [0, 2, 4, 5, 7, 9, 11],
                         "minorH":     [0, 2, 3, 5, 7, 8, 11],
                         "minorM":     [0, 2, 3, 5, 7, 9, 11],
@@ -453,8 +421,10 @@ class ComplexRandLoopSeq:
                         "minorBlues": [0, 3, 5, 8, 10],
                         "minorHungarian": [0, 2, 3, 6, 7, 8, 11]
                       }
+
             new()
                 new sequence
+
     """
     def __init__(self, len=16, len1=2, len2=3, len3=4, tempo=180, loop=4, scale="major", root=60):
         
@@ -599,19 +569,24 @@ class ComplexRandLoopSeq:
 class CellAuto:
     """
     Cellular automata
+
         CellAuto(self, size=17, tempo=660, root=220, mulx=10, muly=20)
+
         play()
             start cellular automata
+
         new()
             new random grid
+
         getValues()
             return list of values
+
         getCellNb()
             return total number of cell 
             (total possible number of values in the list)
     """
 
-    def __init__(self, size=17, tempo=660, root=60, mulx=1, muly=1.595):
+    def __init__(self, size=17, tempo=120, root=60, mulx=1, muly=1.595):
         
         self.size = size
         self.tempo = 60/tempo
@@ -695,28 +670,41 @@ class CellAuto:
 class TripleChaos:
     """
         3 x 3 non-linear ordinary differential equations
+
             TripleChaos(type=1, pitch=.5, chaos1=.5, chaos2=.5, chaos3=.5, amp1=.5, amp2=.5, amp3=.5, stereo=False)
+
             type: 1: Rossler
                   2: Lorenz
                   3: ChenLee  
+
             pitch, chaos and mul : between 0 and 1
+
             stereo : True or False
+
     setPitch(pitch)
         set osc1 pitch
+
     setChaos1(chaos)
         set chaos of osc1
+
     setChaos2(chaos)
         set chaos of osc2
+
     setChaos3(chaos)
         set chaos of osc3
+
     setMul1(mul)
         set volume of osc1
+
     setMul2(mul)
         set volume of osc2
+
     setMul3(mul)
         set volume of osc3
+
     out()
         output osc3
+
     ctrl()
         display sliders for each available parameters
     """
@@ -790,11 +778,14 @@ class TripleChaos:
 
 #_________________________________________________________________________________________________________
 
-ent = EntropieRegen()
-osc=Sine([300,480,720], mul=ent.val).out()
+pit = CellAuto(root=440)
+pit.play()
+vol = 1/pit.size
+osc=Sine(pit.values, mul=vol).out()
 
-met = Metro(3).play()
-trig = TrigFunc(met, ent.new, arg=None)
-
+met = Metro(.1).play()
+def npit():
+    osc.setFreq(pit.getValues())
+trig = TrigFunc(met, npit)
 
 s.gui(locals())
